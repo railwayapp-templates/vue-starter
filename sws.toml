@@ -1,0 +1,26 @@
+[general]
+host = "::"
+port = 3000
+root = "./dist"
+health = true
+compression = true
+cache-control-headers = false
+
+# Keep asset requests intact, including 404s for files that do not exist.
+[[advanced.rewrites]]
+source = "**/*.*"
+destination = "$0"
+
+# Serve the SPA shell for extensionless client-side routes (GET and HEAD).
+[[advanced.rewrites]]
+source = "**"
+destination = "/index.html"
+
+[[advanced.headers]]
+source = "**"
+headers = { Cache-Control = "no-cache", X-Content-Type-Options = "nosniff" }
+
+# Vite puts content-hashed bundles under assets/.
+[[advanced.headers]]
+source = "/assets/**"
+headers = { Cache-Control = "public, max-age=31536000, immutable" }

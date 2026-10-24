@@ -1,44 +1,45 @@
 ---
-title: Vue 3 + TypeScript + Vite + Caddy
-description: The default Vue + Vite TS starter, utilizing `Caddy` to serve the built single page app
+title: Vue 3 + TypeScript + Vite + static-web-server
+description: The default Vue + Vite TS starter, using static-web-server to serve the built single page app
 tags:
   - Node
   - Vue 3
   - Vite
   - TypeScript
-  - Caddy
+  - static-web-server
 ---
 
-# Vue 3 + TypeScript + Vite + Caddy
+# Vue 3 + TypeScript + Vite + static-web-server
 
-This template should help get you started developing with Vue and TypeScript in Vite. The template uses Vue 3 With TypeScript.
+A Vue 3 and TypeScript starter built with Vite.
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/Qh0OAU?referralCode=ySCnWl)
 
-## ✨ Features
+## Local development
 
-- Vue 3 + TypeScript + Vite + Caddy
-- Caddy v2
+```sh
+npm ci
+npm run dev
+```
 
-## 💁‍♀️ Local Development
+Open `http://localhost:5173/`. The application reloads as source files change.
 
-- Install required dependencies with `npm install`
-- Start the server for local development `npm run dev`
-- Navigate to `http://localhost:5173/. The application will automatically reload if you change any of the source files.
+## Docker deployment
 
-## ❓ Why use `Caddy` when deploying to Railway?
+```sh
+docker build -t vue-starter .
+docker run --rm -p 3000:3000 vue-starter
+```
 
-Caddy is a powerful, enterprise-ready, open source web server, and therefore Caddy is far better suited to serve websites than Vite is, using Caddy will result in much less memory and cpu usage compared to serving with Vite (much lower running costs too)
+The image builds the app with Vite, then serves `dist/` with the official
+static-web-server 2.44.1 scratch image. The runtime runs as UID/GID 65532 and
+listens on port 3000, preserving the existing Railway service and proxy port.
+Railway detects the Dockerfile. Configure the platform's target port as 3000;
+`PORT` does not override the listener defined in `sws.toml`.
 
-To see how this is achieved with nixpacks, check out the fully documented nixpacks.toml file in this repository
+`GET /health` and `HEAD /health` return 200. `sws.toml` configures compression,
+client-side routes, and cache headers. Hashed `/assets/` files are cached for a
+year; the entry page and other files are revalidated. Missing assets return 404.
 
-The configuration for Caddy is called a Caddyfile, and you can edit that file to further suite your needs, by default it comes configured to serve a single page app for Vue 3, and to also gzip the responses
-
-**Relevant Caddy documentation:**
-
-- [The Caddyfile](https://caddyserver.com/docs/caddyfile)
-- [Caddyfile Directives](https://caddyserver.com/docs/caddyfile/directives)
-- [root](https://caddyserver.com/docs/caddyfile/directives/root)
-- [encode](https://caddyserver.com/docs/caddyfile/directives/encode)
-- [file_server](https://caddyserver.com/docs/caddyfile/directives/file_server)
-- [try_files](https://caddyserver.com/docs/caddyfile/directives/try_files)
+The static server handles termination signals directly. Node and npm are only
+used during the build; browser JavaScript runs in the browser.
